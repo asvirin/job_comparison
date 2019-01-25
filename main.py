@@ -129,11 +129,11 @@ def get_vacancies_statistics_superjob(languages_list, head_table):
     return vacancies_statistics_superjob_list
 
 
-def main(vacancies_list, title_table):
+def get_table_with_statistics(vacancies_list, title_table):
     table_for_print = AsciiTable(vacancies_list, title_table)
     return table_for_print.table
 
-if __name__ == '__main__':
+def main():
     load_dotenv()
     languages_list =[
           'Java',
@@ -155,10 +155,14 @@ if __name__ == '__main__':
     title_table_data_superjob = 'SuperJob Moscow'
 
     headhunter_table = \
-        main(get_vacancies_statistics_headhunter(languages_list,
+        get_table_with_statistics(get_vacancies_statistics_headhunter(languages_list,
              head_table), title_table_data_headhunter)
     superjob_table = \
-        main(get_vacancies_statistics_superjob(languages_list,
+        get_table_with_statistics(get_vacancies_statistics_superjob(languages_list,
              head_table), title_table_data_superjob)
     print(headhunter_table)
     print(superjob_table)
+    
+
+if __name__ == '__main__':
+    main()
