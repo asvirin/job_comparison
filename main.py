@@ -24,7 +24,7 @@ def predict_rub_salary_for_headhunter(vacancy_salary):
                 vacancy_salary['to'])
 
 
-def predict_rub_salary_for_superjob(salary_from, salary_to):
+def predict_salary_for_superjob(salary_from, salary_to):
     if salary_from == 0 and salary_to == 0 or salary_from is None \
         and salary_to is None:
         return None
@@ -39,22 +39,22 @@ def get_table_for_print(source, vacancies_list):
 
 
 def get_language_statistics(language, source, vacancies_all_pages):
-    vacancies_processed = 0
-    salary_language_sum = 0
-
-    for vacancy in vacancies_all_pages:
-        if source == 'Headhunter':
-            predict_salary = \
-                predict_rub_salary_for_headhunter(vacancy['salary'])
-        else:
-            predict_salary = \
-                predict_rub_salary_for_superjob(vacancy['payment_from'
-                    ], vacancy['payment_to'])
-        if predict_salary is not None:
-            vacancies_processed += 1
-            salary_language_sum += predict_salary
+    if source == 'Headhunter':
+        salary_list = \
+            [predict_rub_salary_for_headhunter(vacancy['salary'])
+             for vacancy in vacancies_all_pages
+             if predict_rub_salary_for_headhunter(vacancy['salary'])
+             is not None]
+    else:
+        salary_list = \
+            [predict_salary_for_superjob(vacancy['payment_from'],
+             vacancy['payment_to']) for vacancy in vacancies_all_pages
+             if predict_salary_for_superjob(vacancy['payment_from'],
+             vacancy['payment_to']) is not None]
 
     vacancies_found = len(vacancies_all_pages)
+    vacancies_processed = len(salary_list)
+    salary_average = int(sum(salary_list) / len(salary_list))
 
     if vacancies_found == 0:
         return [language, 0, 0, 0]
@@ -62,7 +62,7 @@ def get_language_statistics(language, source, vacancies_all_pages):
         return [language, vacancies_found, 0, 0]
     else:
         return [language, vacancies_found, vacancies_processed,
-                int(salary_language_sum / vacancies_processed)]
+                salary_average]
 
 
 def get_vacancies_statistics_Headhunter(source, languages_list,
@@ -117,7 +117,7 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
 def get_vacancies_statistics_SuperJob(source, languages_list,
         head_table):
     url_api_superjob = 'https://api.superjob.ru/2.0/vacancies/'
-    api_key_superjob = os.getenv('api_key_superjob')
+    api_key_superjob = os.getenv("api_key_superjob")
     headers = {'X-Api-App-Id': api_key_superjob}
     location = '4'
     keywords_location_search = '1'
