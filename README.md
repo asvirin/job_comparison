@@ -4,7 +4,7 @@
 [API HeadHunter](https://github.com/hhru/api)
 [API SuperJob](https://api.superjob.ru)
 
-Проект ищет ключевые слова в вакансиях. В качестве ключевых слов используются названия языков программирования. Далее происходит обработка зарплат в функциях predict_rub_salary_for_headhunter и predict_rub_salary_for_superjob.
+Проект ищет ключевые слова в вакансиях. В качестве ключевых слов используются названия языков программирования. Далее происходит обработка зарплат в функциях predict_rub_salary_for_headhunter и predict_salary_for_superjob.
 
 ### Как установить
 
