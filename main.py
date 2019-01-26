@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import os
 import requests
 from terminaltables import AsciiTable
 from dotenv import load_dotenv
