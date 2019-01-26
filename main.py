@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 import os
 import requests
 from terminaltables import AsciiTable
@@ -66,7 +67,6 @@ def get_language_statistics(language, source, vacancies_all_pages):
 
 def get_vacancies_statistics_Headhunter(source, languages_list,
         head_table):
-    
     url_api_headhunter = 'https://api.hh.ru/vacancies/'
     specialization = '1.221'
     location = '1'
@@ -83,6 +83,7 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
             'area': location,
             'period': period_search,
             'per_page': result_per_page,
+            'page': page,
             'text': language,
             }
         response = requests.get(url_api_headhunter, params=payload)
@@ -104,8 +105,8 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
             vacancies_all_pages += vacancies['items']
             page += 1
 
-            vacancies_statistics_list.append(get_language_statistics(language,
-                    source, vacancies_all_pages))
+        vacancies_statistics_list.append(get_language_statistics(language,
+                source, vacancies_all_pages))
 
     table_for_print = get_table_for_print(source,
             vacancies_statistics_list)
@@ -161,6 +162,6 @@ if __name__ == '__main__':
          'Вакансий\nобработано',
          'Средняя\nзарплата'
          ]]
-
+        
     print(get_vacancies_statistics_Headhunter('Headhunter', languages_list, head_table))
     print(get_vacancies_statistics_SuperJob('SuperJob', languages_list, head_table))
