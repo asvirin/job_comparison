@@ -7,6 +7,12 @@ from terminaltables import AsciiTable
 from dotenv import load_dotenv
 
 
+def get_table_for_print(source, vacancies_list):
+    title_table = '{} Moscow'.format(source)
+    table = AsciiTable(vacancies_list, title_table)
+    return table.table
+
+
 def get_avarage_salary_for_vacancy(source, vacancy):
     if source == 'Headhunter' and vacancy['salary'] is not None:
         salary_from = vacancy['salary']['from']
@@ -29,23 +35,11 @@ def get_avarage_salary_for_vacancy(source, vacancy):
         return (salary_from + salary_to) / 2
 
 
-def get_table_for_print(source, vacancies_list):
-    title_table = '{} Moscow'.format(source)
-    table = AsciiTable(vacancies_list, title_table)
-    return table.table
-
-
 def get_language_statistics(language, source, vacancies_all_pages):
-    if source == 'Headhunter':
-        salary_list = [get_avarage_salary_for_vacancy(source, vacancy)
-                       for vacancy in vacancies_all_pages
-                       if get_avarage_salary_for_vacancy(source,
-                       vacancy) is not None]
-    else:
-        salary_list = [get_avarage_salary_for_vacancy(source, vacancy)
-                       for vacancy in vacancies_all_pages
-                       if get_avarage_salary_for_vacancy(source,
-                       vacancy) is not None]
+    salary_list = [get_avarage_salary_for_vacancy(source, vacancy)
+                   for vacancy in vacancies_all_pages
+                   if get_avarage_salary_for_vacancy(source, vacancy)
+                   is not None]
 
     vacancies_found = len(vacancies_all_pages)
     vacancies_processed = len(salary_list)
