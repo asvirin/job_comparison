@@ -7,29 +7,26 @@ from terminaltables import AsciiTable
 from dotenv import load_dotenv
 
 
-def get_avarage_salary_for_vacancy(salary_from, salary_to):
-    if salary_from == 0 or salary_from is None:
+def get_avarage_salary_for_vacancy(source, vacancy):
+    if source == 'Headhunter' and vacancy['salary'] is not None:
+        salary_from = vacancy['salary']['from']
+        salary_to = vacancy['salary']['to']
+        salary_currency = vacancy['salary']['currency']
+    elif source == 'SuperJob':
+        salary_from = vacancy['payment_from']
+        salary_to = vacancy['payment_to']
+        salary_currency = 'RUR'
+    else:
+        return None
+
+    if salary_from == 0 and salary_to == 0 or salary_currency != 'RUR':
+        return None
+    elif salary_from == 0 or salary_from is None:
         return salary_to * 0.8
     elif salary_to == 0 or salary_to is None:
         return salary_from * 1.2
     else:
         return (salary_from + salary_to) / 2
-
-
-def predict_rub_salary_for_headhunter(vacancy_salary):
-    if vacancy_salary is None or vacancy_salary['currency'] != 'RUR':
-        return None
-    else:
-        return get_avarage_salary_for_vacancy(vacancy_salary['from'],
-                vacancy_salary['to'])
-
-
-def predict_salary_for_superjob(salary_from, salary_to):
-    if salary_from == 0 and salary_to == 0 or salary_from is None \
-        and salary_to is None:
-        return None
-    else:
-        return get_avarage_salary_for_vacancy(salary_from, salary_to)
 
 
 def get_table_for_print(source, vacancies_list):
@@ -40,36 +37,35 @@ def get_table_for_print(source, vacancies_list):
 
 def get_language_statistics(language, source, vacancies_all_pages):
     if source == 'Headhunter':
-        salary_list = \
-            [predict_rub_salary_for_headhunter(vacancy['salary'])
-             for vacancy in vacancies_all_pages
-             if predict_rub_salary_for_headhunter(vacancy['salary'])
-             is not None]
+        salary_list = [get_avarage_salary_for_vacancy(source, vacancy)
+                       for vacancy in vacancies_all_pages
+                       if get_avarage_salary_for_vacancy(source,
+                       vacancy) is not None]
     else:
-        salary_list = \
-            [predict_salary_for_superjob(vacancy['payment_from'],
-             vacancy['payment_to']) for vacancy in vacancies_all_pages
-             if predict_salary_for_superjob(vacancy['payment_from'],
-             vacancy['payment_to']) is not None]
+        salary_list = [get_avarage_salary_for_vacancy(source, vacancy)
+                       for vacancy in vacancies_all_pages
+                       if get_avarage_salary_for_vacancy(source,
+                       vacancy) is not None]
 
     vacancies_found = len(vacancies_all_pages)
     vacancies_processed = len(salary_list)
-    salary_average = int(sum(salary_list) / len(salary_list))
 
-    if vacancies_found == 0:
+    if not vacancies_found:
         return [language, 0, 0, 0]
-    elif vacancies_processed == 0:
+    elif not vacancies_processed:
+
         return [language, vacancies_found, 0, 0]
     else:
+
         return [language, vacancies_found, vacancies_processed,
-                salary_average]
+                int(sum(salary_list) / len(salary_list))]
 
 
 def get_vacancies_statistics_Headhunter(source, languages_list,
         head_table):
     url_api_headhunter = 'https://api.hh.ru/vacancies/'
-    specialization = '1.221'
-    location = '1'
+    specialization_IT = '1.221'
+    location_Moscow = '1'
     period_search = '30'
     result_per_page = '20'
     max_result = '2000'
@@ -79,8 +75,8 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
     for language in languages_list:
         page = 0
         payload = {
-            'specialization': specialization,
-            'area': location,
+            'specialization': specialization_IT,
+            'area': location_Moscow,
             'period': period_search,
             'per_page': result_per_page,
             'page': page,
@@ -93,8 +89,8 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
         while vacancies['found'] > len(vacancies_all_pages) \
             <= int(max_result) - int(result_per_page):
             payload = {
-                'specialization': specialization,
-                'area': location,
+                'specialization': specialization_IT,
+                'area': location_Moscow,
                 'period': period_search,
                 'page': page,
                 'per_page': result_per_page,
@@ -117,10 +113,10 @@ def get_vacancies_statistics_Headhunter(source, languages_list,
 def get_vacancies_statistics_SuperJob(source, languages_list,
         head_table):
     url_api_superjob = 'https://api.superjob.ru/2.0/vacancies/'
-    api_key_superjob = os.getenv("api_key_superjob")
+    api_key_superjob = os.getenv('api_key_superjob')
     headers = {'X-Api-App-Id': api_key_superjob}
-    location = '4'
-    keywords_location_search = '1'
+    location_Moscow = '4'
+    keywords_search_in_header = '1'
     result_per_page = '100'
     period_search = '0'
 
@@ -128,8 +124,8 @@ def get_vacancies_statistics_SuperJob(source, languages_list,
 
     for language in languages_list:
         payload = {
-            'town': location,
-            'keywords[0][srws]': keywords_location_search,
+            'town': location_Moscow,
+            'keywords[0][srws]': keywords_search_in_header,
             'keywords[0][keys]': language,
             'count': result_per_page,
             'period': period_search,
